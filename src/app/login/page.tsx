@@ -43,7 +43,7 @@ export default function Login ( ){
                         alignItems:"center",
                         height: "35vh",
                     }}
-            >
+                >
                     <Image src='/image.png' alt="Logo" width={250}  height={300}/>  
                 </Box>
                 <Typography variant="body1" sx={{ fontSize: 40, fontStyle: "italic" }}>

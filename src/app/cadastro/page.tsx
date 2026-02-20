@@ -1,113 +1,107 @@
-"use client"; // precisa porque vamos usar hooks do React (useState)
+"use client";
 
-import {TextField, Button, Box, Typography, MenuItem, Paper } from "@mui/material";
-import {ThemeProvider} from "@mui/material/styles";
-import theme from '../../theme/theme'
+import { TextField, Button, Box, Typography, MenuItem, Paper } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import theme from '../../theme/theme';
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 
 export default function Cadastro() {
-  //função para usar o tema criado na pasta theme
   const Theme = theme;
-  //função para editar o tamanho dos campos para cadastro de usuário textfield
-  const estiloCampo = {
-    display: "flex",
-    flexdirection: "column",
-  }
 
-  //função para salvar os nomes digitados pelo usuário
-  const[form, setFrom]=useState({
+  // Muda o estado do formulário conforme digita os novos dados
+  const [form, setForm] = useState({
     nome: "",
     posto: "",
     identidade: "",
     senha: "",
     dataPraca: "",
     escala: "",
-  })
+  });
 
-  //função que exibe os tipos de escala no select
-  const escalas=[
+  // Tipos de escala
+  const escalas = [
     "Oficial de Dia",
     "Adjunto ao Oficial de Dia",
     "Sargento de Dia",
     "Comandante da Guarda",
   ];
 
-  //função para renderizar a página sempre que um campo for alterado
-  const handleChange=(e)=>{
-    setFrom({...form,[e.target.name]: e.target.value});
+  const postos = [
+    "Soldado",
+    "Cabo",
+    "3º Sgt Sargento",
+    "2º Sgt Sargento",
+    "1º Sgt Sargento",
+    "Aspirante a Oficial",
+    "2º Tenente",
+    "1º Tenente",
+  ];
+
+  // Atualiza estado ao digitar
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit=async(e)=>{
+  // Envia formulário para o backend
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    //validação dos campos
-    if(!form.nome || !form.posto || !form.identidade || !form.senha || !form.dataPraca || !form.escala) {
+
+    // Validação simples
+    if (!form.nome || !form.posto || !form.identidade || !form.senha || !form.dataPraca || !form.escala) {
       alert("Preencha todos os campos!");
       return;
-    };
-    // Prepara os dados para enviar ao backend
-    try{
-      const payload={
-        nome:form.nome,
-        posto:form.posto,
-        identidade:form.identidade,
-        senha:form.senha,
-        dataPraca:form.dataPraca,
-        escala:form.escala,
-      };
-      // Axios envia o JSON automaticamente
-      const response = await axios.post(
-        "colocar rota do backend aqui",
-        payload
-      );
+    }
 
-      // Resposta de sucesso
-      alert(response.data.message);
+    try {
+      // Prepara os dados para envio ao back
+      const payload = { ...form };
 
-      // Limpa o formulário
+      // Axios envia para o endpoint do Next.js API mais simples possivel
+      const response = await axios.post("/api/militares", payload);
+
+      alert(response.data.mensagem || "Usuário cadastrado com sucesso");
+
+      // Limpa formulário após clicar em cadastar
       setForm({ nome: "", posto: "", identidade: "", senha: "", dataPraca: "", escala: "" });
-    }catch (err){
-      if (err.response){
-        // Erros retornados pelo backend
-        alert(err.response.data.error || "Erro no cadastro");
-      }else if (err.reques){
-        // Requisição feita, mas sem resposta do servidor
+
+    } catch (err: any) {
+      if (err.response) {
+        alert(err.response.data.erro || "Erro no cadastro");
+      } else if (err.request) {
         alert("Servidor não respondeu. Verifique se o backend está rodando.");
       } else {
-        // Erro na configuração da requisição
         alert("Erro ao enviar a requisição: " + err.message);
       }
       console.error(err);
     }
   };
 
-
-
   return (
-    <ThemeProvider theme={Theme}> {/*importa o tema criado na pasta theme*/}
+    <ThemeProvider theme={Theme}> 
       <Box
         sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        background: "linear-gradient(10deg, #d3c125, #96948d)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          background: "linear-gradient(10deg, #d3c125, #96948d)",
         }}
       >
-        <Typography sx={{ fontSize: 40, fontStyle: "italic"}}>
-        18º Batalhão de Transporte
+        <Typography sx={{ fontSize: 40, fontStyle: "italic" }}>
+          18º Batalhão de Transporte
         </Typography>
         <Box
           component="img"
           src="/image.png"
           alt="Logo"
-          sx={{width: 200, padding: 1}}
-        />        
+          sx={{ width: 200, padding: 1 }}
+        />
         <Typography sx={{ fontSize: 40, fontStyle: "italic" }}>
-            A logística em movimento
+          A logística em movimento
         </Typography>
-     
+
         <Paper
           elevation={3}
           sx={{
@@ -119,14 +113,14 @@ export default function Cadastro() {
             display: "flex",
             flexDirection: "column",
             border: 2,
-            "&:hover": {               // efeito hover para melhor vizualização
-                color: "#4cf709",
-                textDecorationColor: "black",
-                fontSize:"20px"
+            "&:hover": {
+              color: "#4cf709",
+              textDecorationColor: "black",
+              fontSize: "20px"
             },
           }}
         >
-          <Typography variant="h5" align="center"sx={{mb:2}}>
+          <Typography variant="h5" align="center" sx={{ mb: 2 }}>
             Cadastro de Usuário
           </Typography>
           <Box
@@ -140,7 +134,6 @@ export default function Cadastro() {
               gap: 1.5
             }}
           >
-             {/* Linha 1 */}
             <TextField
               label="Nome completo"
               name="nome"
@@ -148,17 +141,13 @@ export default function Cadastro() {
               onChange={handleChange}
               required
               size="small"
-              variant="outlined" //necessário para mudar a borda
+              variant="outlined"
               sx={{
                 width: 350,
-                "& .MuiOutlinedInput-root":{
-                  "&.Mui-focused fieldset":{
-                    borderColor: "black", //cor da borda quando clicado
-                  },
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": { borderColor: "black" },
                 },
-                "& label.Mui-focused":{
-                  color:"red", // label quando clicado
-                },
+                "& label.Mui-focused": { color: "red" },
               }}
             />
 
@@ -170,27 +159,18 @@ export default function Cadastro() {
               select
               required
               size="small"
-              variant="outlined" //necessário para mudar a borda
+              variant="outlined"
               sx={{
                 width: 350,
-                "& .MuiOutlinedInput-root":{
-                  "&.Mui-focused fieldset":{
-                    borderColor: "black", //cor da borda quando clicado
-                  },
-                },
-                "& label.Mui-focused":{
-                  color:"red", // label quando clicado
-                },
+                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                "& label.Mui-focused": { color: "red" },
               }}
             >
-              <MenuItem value="Soldado">Soldado</MenuItem>
-              <MenuItem value="Cabo">Cabo</MenuItem>
-              <MenuItem value="3º Sgt Sargento">3º Sgt Sargento</MenuItem>
-              <MenuItem value="2º Sgt Sargento">2º Sgt Sargento</MenuItem>
-              <MenuItem value="1º Sgt Sargento">1º Sgt Sargento</MenuItem>
-              <MenuItem value="Aspirante a Oficial">Aspirante a Oficial</MenuItem>
-              <MenuItem value="2º Tenente">2º Tenente</MenuItem>
-              <MenuItem value="1º Tenente">1º Tenente</MenuItem>
+             {postos.map((postos, index) => (
+                <MenuItem key={index} value={postos}>
+                  {postos}
+                </MenuItem>
+              ))}
             </TextField>
 
             <TextField
@@ -200,21 +180,14 @@ export default function Cadastro() {
               onChange={handleChange}
               required
               size="small"
-              variant="outlined" //necessário para mudar a borda
+              variant="outlined"
               sx={{
                 width: 350,
-                "& .MuiOutlinedInput-root":{
-                  "&.Mui-focused fieldset":{
-                    borderColor: "black", //cor da borda quando clicado
-                  },
-                },
-                "& label.Mui-focused":{
-                  color:"red", // label quando clicado
-                },
+                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                "& label.Mui-focused": { color: "red" },
               }}
             />
 
-            {/* Linha 2 */}
             <TextField
               label="Senha"
               name="senha"
@@ -223,17 +196,11 @@ export default function Cadastro() {
               onChange={handleChange}
               required
               size="small"
-              variant="outlined" //necessário para mudar a borda
+              variant="outlined"
               sx={{
                 width: 350,
-                "& .MuiOutlinedInput-root":{
-                  "&.Mui-focused fieldset":{
-                    borderColor: "black", //cor da borda quando clicado
-                  },
-                },
-                "& label.Mui-focused":{
-                  color:"red", // label quando clicado
-                },
+                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                "& label.Mui-focused": { color: "red" },
               }}
             />
 
@@ -246,17 +213,11 @@ export default function Cadastro() {
               required
               InputLabelProps={{ shrink: true }}
               size="small"
-              variant="outlined" //necessário para mudar a borda
+              variant="outlined"
               sx={{
                 width: 350,
-                "& .MuiOutlinedInput-root":{
-                  "&.Mui-focused fieldset":{
-                    borderColor: "black", //cor da borda quando clicado
-                  },
-                },
-                "& label.Mui-focused":{
-                  color:"red", // label quando clicado
-                },
+                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                "& label.Mui-focused": { color: "red" },
               }}
             />
 
@@ -268,36 +229,28 @@ export default function Cadastro() {
               onChange={handleChange}
               required
               size="small"
-              variant="outlined" //necessário para mudar a borda
+              variant="outlined"
               sx={{
                 width: 350,
-                "& .MuiOutlinedInput-root":{
-                  "&.Mui-focused fieldset":{
-                    borderColor: "black", //cor da borda quando clicado
-                  },
-                },
-                "& label.Mui-focused":{
-                  color:"red", // label quando clicado
-                },
+                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                "& label.Mui-focused": { color: "red" },
               }}
             >
-            {escalas.map((escala, index) => (
-              <MenuItem key={index} value={escala}>
-                {escala}
-              </MenuItem>
-            ))}
+              {escalas.map((escala, index) => (
+                <MenuItem key={index} value={escala}>
+                  {escala}
+                </MenuItem>
+              ))}
             </TextField>
-            {/* Botão centralizado */}
-            <Box sx={{gridColumn: "2 / 3", display:"flex", justifyContent:"center", mt: 1}}> {/*gridcolumn 2/3 faz o botão ficar no meio */}
+
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
               <Button type="submit" variant="contained" color="primary" sx={{ px: 4 }}>
                 Cadastrar
               </Button>
-            </Box> 
+            </Box>
           </Box>
         </Paper>
       </Box>
     </ThemeProvider>
   );
 }
-
-

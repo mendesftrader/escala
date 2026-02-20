@@ -30,6 +30,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "src/app/page.js"  ],
+, "src/app/page.js", "src/backend/testDb.js"  ],
   "exclude": ["node_modules"]
 }

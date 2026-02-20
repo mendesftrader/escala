@@ -13,6 +13,10 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "mysql2": "^3.17.3",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
