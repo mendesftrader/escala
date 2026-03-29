@@ -1,6 +1,7 @@
-"use client"; // necessário para usar hooks
+"use client"; //componente executado do lado do cliente
 
 import { useState, useEffect } from "react";
+//usestate cria os estados e usefffect executa o coódigo ao carregar
 import {
   Box,
   Typography,
@@ -22,14 +23,14 @@ import {
   AccordionDetails,
   MenuItem,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore"; // usar para mostrar que o accordion está aberto
 import Image from "next/image";
 import theme from "../../theme/layout";
 import { ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
-import Header from "../../components/Header";
 
-//tipagaem, necessária para não dar erros no typescript
+
+//tipagem necessária para o typeScript
 interface Militar {
   id: number;
   id_militar: number;
@@ -40,17 +41,14 @@ interface Militar {
   escala: string;
   ultimo_servico?: string | null;
   status: "ATIVO" | "INATIVO";
-  motivo: string;
-  unidade: string;
 }
 
-//cria a página e coloco o tema padrao
-export default function MilitaresPage() {
+export default function MilitaresPage() { //componente principal
   const Theme = theme;
-  const [loading, setLoading] = useState(true);
-  // estado com tipagem para evitar erros no typescript
-  const [militares, setMilitares] = useState<Militar[]>([]);
-  const [editMilitar, setEditMilitar] = useState<Militar | null>(null);
+
+  const [militares, setMilitares] = useState<Militar[]>([]); //estado que guarda todos os militares
+  const [editMilitar, setEditMilitar] = useState<Militar | null>(null); //estado do militar que está sendo editado
+  const [expanded, setExpanded] = useState<string | false>(false);// estado que controla qual accordion está aberto
 
   const postos = [
     "Soldado",
@@ -70,113 +68,76 @@ export default function MilitaresPage() {
     "Comandante da Guarda",
   ];
 
-  const unidades = [
-    "18º BTrnp",
-    "9º B Mnt",
-    "Cia Cmd 9º Gpt Log",
-    "9º B Sau",
-  ]
-
   const status = ["ATIVO", "INATIVO"] as const;
 
-  const motivo = [
-    "Apresentado",
-    "Curso",
-    "Dispensa Médica",
-    "Férias",
-    "Instrução",
-    "Licença Paternidade",
-    "Licença Maternidade",
-    "Missão fora da OM",
-    "Operação",
-    "outros"
-  ]
+  // carrega os dados do back
+  const carregarMilitares = async () => {
+    try {
+      const resposta = await axios.get<Militar[]>("/api/militares");
+      setMilitares(resposta.data);
+      console.log(resposta.data);
+    } catch (error) {
+      console.error("Erro ao carregar dados", error);
+    }
+  };
 
- //carrega os dados do backend
+  //carrega os itens do acordion revisar depois
   useEffect(() => {
-    async function carregarMilitares() {
-      try {
-        const resposta = await axios.get<Militar[]>("/api/militares"); // tipagem no axios, nunca esqueça a tipagem, faça o teste da rota no navegador(metodo simples)
-        setMilitares(resposta.data);
-        console.log(resposta.data); //mostra no console os dados carregados
-      } catch (error) {
-        console.error("Erro ao carregar dados", error);
-      } finally{
-        setLoading(false);
-      }
+    const fetchData = async () => {
+      await carregarMilitares();
     };
-    carregarMilitares();
+    fetchData();
   }, []);
-  
-  if (loading) {
-    return <p>Carregando...</p>;
-  }
 
-  //modal de edição//
-  //configura a data para não gerar erro com o banco de dados
+  //qual accordion está aberto
+  const handleAccordionChange =
+    (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+      setExpanded(isExpanded ? panel : false);
+    };
+
+  //abre modal de edição e configura a data pra não gerar erro no BD
   const handleEditClick = (militar: Militar) => {
     setEditMilitar({
       ...militar,
       dataPraca: militar.dataPraca
-        ? militar.dataPraca.slice(0, 10)
+        ? new Date(militar.dataPraca).toISOString().slice(0, 10)
         : "",
       ultimo_servico: militar.ultimo_servico
-        ? militar.ultimo_servico.slice(0, 10)
+        ? new Date(militar.ultimo_servico).toISOString().slice(0, 10)
         : null,
     });
   };
 
-  // salva as alterações feitas pelo admin
+  //alva alterações
   const handleSave = async () => {
-    if (!editMilitar) return;
-    const militarEditado = editMilitar;
-    // salva estado antigo
-    const antigo = militares;
-    // atualiza na tela do usuário automaticamente
-    setMilitares((prev) =>
-      prev.map((m) =>
-        m.id_militar === militarEditado.id_militar
-          ? militarEditado
-          : m
-      )
-    );
-    setEditMilitar(null);
+    if (!editMilitar) return; //significa se não tiver militar para editar pare a funçaõ
     try {
-      await axios.put(
-        `/api/militares/${militarEditado.id_militar}`,
-        militarEditado
-      );
+      await axios.put(`/api/militares/${editMilitar.id_militar}`, editMilitar); //envia os dados para o BD
+      await carregarMilitares(); // chama a função após a atualização
+      setEditMilitar(null); //muda o estado do militar editado
     } catch (error) {
       console.error("Erro ao salvar alterações", error);
-      setMilitares(antigo);
       alert("Erro ao atualizar militar.");
     }
   };
 
-
-  // Deletar militar
-  //permite excluir usuários
-  const handleDelete = async (id: number) => {
-    if (!id) return;
-    try {
-      await axios.delete(`/api/militares/${id}`);
+  //deleta o militar escolhido
+  const handleDelete = async (id:number) => {
+    if(!id) return; //não inicializa a função se não tiver nada a deletar
+    try{
+      await axios.delete(`/api/militares/${id}`)
       setMilitares(prev => prev.filter(m => m.id_militar !== id));
-    } catch (error) {
-      console.error("Erro ao deletar usuário", error);
+    }catch{
+      alert("Erro ao excluir o militar.");
     }
   };
-  
-  //Renderiza a tabela do banco de dados por escala
-  //organiza por data de praça
-  const renderTabelaPorPosto = (postosArray: string[]) => {
-    const militaresFiltrados = militares.filter((m) => postosArray.includes(m.posto))
-    .sort((a, b) => {
-      if (!a.dataPraca) return -1;
-      if (!b.dataPraca) return 1;
 
-      return a.dataPraca.localeCompare(b.dataPraca);
-    });
-    
+  //cria a tabela
+  const renderTabelaPorPosto = (postosArray: string[]) => {
+    const militaresFiltrados = militares.filter((m) =>
+      postosArray.includes(m.posto)
+    );
+
     return (
       <Box sx={{ display: "flex", justifyContent: "center", width: "100%", my: 2 }}>
         <TableContainer component={Paper} sx={{ width: "100%" }}>
@@ -190,11 +151,10 @@ export default function MilitaresPage() {
                 <TableCell align="center">Escala</TableCell>
                 <TableCell align="center">Último Serviço</TableCell>
                 <TableCell align="center">Status</TableCell>
-                <TableCell align="center">Motivo</TableCell>
-                <TableCell align="center">Unidade</TableCell>
                 <TableCell align="center">Ações</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {militaresFiltrados.map((m) => (
                 <TableRow key={m.id_militar}>
@@ -202,16 +162,15 @@ export default function MilitaresPage() {
                   <TableCell align="center">{m.posto}</TableCell>
                   <TableCell align="center">{m.identidade}</TableCell>
                   <TableCell align="center">
-                    {m.dataPraca ? m.dataPraca.slice(0, 10).split("-").reverse().join("/") : "-"}
+                    {new Date(m.dataPraca).toLocaleDateString("pt-BR")}
                   </TableCell>
                   <TableCell align="center">{m.escala}</TableCell>
                   <TableCell align="center">
                     {m.ultimo_servico
-                      ? m.ultimo_servico.slice(0, 10).split("-").reverse().join("/") : "-"}
+                      ? new Date(m.ultimo_servico).toLocaleDateString("pt-BR")
+                      : "-"}
                   </TableCell>
                   <TableCell align="center">{m.status}</TableCell>
-                  <TableCell align="center">{m.motivo}</TableCell>
-                  <TableCell align="center">{m.unidade}</TableCell>
                   <TableCell align="center">
                     <Button
                       variant="contained"
@@ -239,10 +198,8 @@ export default function MilitaresPage() {
     );
   };
 
- //montagem dos cpmponentes na página
   return (
     <ThemeProvider theme={Theme}>
-      <Header />
       <Box
         sx={{
           display: "flex",
@@ -257,65 +214,108 @@ export default function MilitaresPage() {
         <Typography sx={{ fontSize: 40, fontStyle: "italic" }}>
           18º Batalhão de Transporte
         </Typography>
+
         <Box sx={{ display: "flex", justifyContent: "center", height: "35vh" }}>
           <Image src="/image.png" alt="Logo" width={250} height={300} />
         </Box>
+
         <Typography sx={{ fontSize: 40, fontStyle: "italic" }}>
           A logística em movimento
         </Typography>
 
-        {/* Accordion por categoria */}
         <Box sx={{ width: "80%", mx: "auto" }}>
-          {/* Oficial de Dia */}
           {(() => {
-            const postosOficialDia = ["1º Tenente", "2º Tenente", "Aspirante a Oficial"];
-            const count = militares.filter((m) => postosOficialDia.includes(m.posto)).length;
+            const postosOficialDia = [
+              "1º Tenente",
+              "2º Tenente",
+              "Aspirante a Oficial",
+            ];
+
+            const count = militares.filter((m) =>
+              postosOficialDia.includes(m.posto)
+            ).length;
+
             return (
-              <Accordion sx={{ backgroundColor: "#6d6969c7" }}>
+              <Accordion
+                expanded={expanded === "oficialDia"}
+                onChange={handleAccordionChange("oficialDia")}
+                sx={{ backgroundColor: "#6d6969c7" }}
+              >
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                   <Typography sx={{ fontWeight: "bold" }}>
                     MILITARES QUE CONCORREM A ESCALA DE OFICIAL DE DIA ({count})
                   </Typography>
                 </AccordionSummary>
-                <AccordionDetails>{renderTabelaPorPosto(postosOficialDia)}</AccordionDetails>
-              </Accordion>
-            );
-          })()}
 
-          {/* Adjunto ao Oficial de Dia */}
-          {(() => {
-            const postosAdjunto = ["1º Sargento", "2º Sargento"];
-            const count = militares.filter((m) => postosAdjunto.includes(m.posto)).length;
-            return (
-              <Accordion sx={{ backgroundColor: "#6d6969c7" }}>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography sx={{ fontWeight: "bold" }}>
-                    MILITARES QUE CONCORREM A ESCALA DE ADJUNTO AO OFICIAL DE DIA ({count})
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>{renderTabelaPorPosto(postosAdjunto)}</AccordionDetails>
-              </Accordion>
-            );
-          })()}
-
-          {/* Sargento de Dia */}
-          {(() => {
-            const postosSargento = ["3º Sargento"];
-            const count = militares.filter((m) => postosSargento.includes(m.posto)).length;
-            return (
-              <Accordion sx={{ backgroundColor: "#6d6969c7" }}>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Typography sx={{ fontWeight: "bold" }}>
-                    MILITARES QUE CONCORREM A ESCALA DE COMANDANTE DA GUARDA ({count})
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>{renderTabelaPorPosto(postosSargento)}</AccordionDetails>
+                <AccordionDetails>
+                  {renderTabelaPorPosto(postosOficialDia)}
+                </AccordionDetails>
               </Accordion>
             );
           })()}
         </Box>
 
-        {/* Modal de edição */}
+        <Box sx={{ width: "80%", mx: "auto", padding: 2 }}>
+          {(() => {
+            const postoAdjunto = [
+              "2º Sargento",
+              "1º Sargento",
+            ];
+
+            const count = militares.filter((m) =>
+              postoAdjunto.includes(m.posto)
+            ).length;
+
+            return (
+              <Accordion
+                expanded={expanded === "postoAdjunto"}
+                onChange={handleAccordionChange("postoAdjunto")}
+                sx={{ backgroundColor: "#6d6969c7" }}
+              >
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography sx={{ fontWeight: "bold" }}>
+                    MILITARES QUE CONCORREM A ESCALA DE OFICIAL DE DIA ({count})
+                  </Typography>
+                </AccordionSummary>
+
+                <AccordionDetails>
+                  {renderTabelaPorPosto(postoAdjunto)}
+                </AccordionDetails>
+              </Accordion>
+            );
+          })()}
+        </Box>  
+
+        <Box sx={{ width: "80%", mx: "auto" }}>
+          {(() => {
+            const postoSgtdia = [
+              "3º Sargento",
+            ];
+
+            const count = militares.filter((m) =>
+              postoSgtdia.includes(m.posto)
+            ).length;
+
+            return (
+              <Accordion
+                expanded={expanded === "postoSgtdia"}
+                onChange={handleAccordionChange("postoSgtdia")}
+                sx={{ backgroundColor: "#6d6969c7" }}
+              >
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography sx={{ fontWeight: "bold" }}>
+                    MILITARES QUE CONCORREM A ESCALA DE OFICIAL DE DIA ({count})
+                  </Typography>
+                </AccordionSummary>
+
+                <AccordionDetails>
+                  {renderTabelaPorPosto(postoSgtdia)}
+                </AccordionDetails>
+              </Accordion>
+            );
+          })()}
+        </Box>
+
         <Dialog open={!!editMilitar} onClose={() => setEditMilitar(null)}>
           <DialogTitle>Editar Militar</DialogTitle>
           <DialogContent>
@@ -353,6 +353,7 @@ export default function MilitaresPage() {
                 setEditMilitar({ ...editMilitar!, identidade: e.target.value })
               }
             />
+
             <TextField
               label="Data Praça"
               type="date"
@@ -383,11 +384,13 @@ export default function MilitaresPage() {
               label="Último Serviço"
               type="date"
               fullWidth
-              InputLabelProps={{ shrink: true }}
               margin="dense"
               value={editMilitar?.ultimo_servico || ""}
               onChange={(e) =>
-                setEditMilitar({ ...editMilitar!, ultimo_servico: e.target.value })
+                setEditMilitar({
+                  ...editMilitar!,
+                  ultimo_servico: e.target.value,
+                })
               }
             />
             <TextField
@@ -397,7 +400,10 @@ export default function MilitaresPage() {
               margin="dense"
               value={editMilitar?.status || ""}
               onChange={(e) =>
-                setEditMilitar({ ...editMilitar!, status: e.target.value as "ATIVO" | "INATIVO" })
+                setEditMilitar({
+                  ...editMilitar!,
+                  status: e.target.value as "ATIVO" | "INATIVO",
+                })
               }
             >
               {status.map((p) => (
@@ -406,44 +412,16 @@ export default function MilitaresPage() {
                 </MenuItem>
               ))}
             </TextField>
-            <TextField
-              label="Motivo"
-              fullWidth
-              select
-              margin="dense"
-              value={editMilitar?.motivo || ""}
-              onChange={(e) =>
-                setEditMilitar({ ...editMilitar!, motivo: e.target.value })
-              }
-            >
-              {motivo.map((p) => (
-                <MenuItem key={p} value={p}>
-                  {p}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              label="Unidade"
-              fullWidth
-              margin="dense"
-              select
-              value={editMilitar?.unidade || ""}
-              onChange={(e) =>
-                setEditMilitar({ ...editMilitar!, unidade: e.target.value })
-              }
-            >
-              {unidades.map((p) => (
-                <MenuItem key={p} value={p}>
-                  {p}
-                </MenuItem>
-              ))}
-            </TextField>
           </DialogContent>
           <DialogActions>
-            <Button variant="outlined" color="error" onClick={() => setEditMilitar(null)}>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => setEditMilitar(null)}
+            >
               Cancelar
             </Button>
-            <Button variant="contained" color="primary" onClick={handleSave}>
+            <Button variant="contained" onClick={handleSave}>
               Salvar
             </Button>
           </DialogActions>

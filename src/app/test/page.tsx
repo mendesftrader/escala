@@ -2,7 +2,7 @@
 
 import { Container, Typography, Button } from "@mui/material";
 import {ThemeProvider} from "@mui/material/styles";
-import theme from '../../theme/theme'
+import theme from '../../theme/layout'
 
 
 export default function TestePage() {

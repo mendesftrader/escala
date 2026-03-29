@@ -5,7 +5,7 @@
 import { useState} from 'react';
 import { TextField, Button, Box, Typography, Link, Paper } from "@mui/material";
 import Image from 'next/image'; //importa a imagem da pasta public
-import theme from '../../theme/theme' // permite usar as cores do theme em todas as páginas
+import theme from '../../theme/layout' // permite usar as cores do theme em todas as páginas
 import {ThemeProvider} from "@mui/material/styles"; //necessário envolver todo o código para utilização do theme
 
 export default function Login ( ){
@@ -62,7 +62,7 @@ export default function Login ( ){
                         display: "flex",
                         flexDirection: "column",
                         border: 2,
-                        "&:hover": {               // efeito hover para melhor vizualização
+                        "&:hover": { // efeito hover para melhor vizualização
                             color: "#d5eb16",
                             textDecorationColor: "black",
                             fontSize:"20px"
