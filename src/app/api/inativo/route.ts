@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import db from "../../../backend/db";
 
 
-// GET-geral, para obter dados
+// GET-geral, para obter dados dos militares inativos
 export async function GET( ){
   try{
       const [militares] = await db.query(
@@ -14,6 +14,7 @@ export async function GET( ){
         escala, 
         ultimo_servico,       
         status,
+        motivo,
         unidade
         FROM militares
         WHERE status = 'INATIVO'

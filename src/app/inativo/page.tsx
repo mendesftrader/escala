@@ -15,11 +15,11 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import theme from "../../theme/layout";
 import { ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 
 //tipagaem, necessária para não dar erros no typescript
@@ -64,7 +64,7 @@ export default function MilitaresPage() {
     return <p>Carregando...</p>;
   }
 
-  //Renderiza a tabela do banco de dados por escala, importante ordenar pelo ultimo serviço
+  //renderiza a tabela do banco de dados por escala, importante ordenar pelo ultimo serviço
   const renderTabelaPorPosto = (postosArray: string[]) => {
     const militaresFiltrados = militares.filter((m) => postosArray.includes(m.posto))
     .sort((a, b) => {
@@ -80,29 +80,29 @@ export default function MilitaresPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center">Nome</TableCell>
-                <TableCell align="center">Posto</TableCell>
-                <TableCell align="center">Escala</TableCell>
-                <TableCell align="center">Último Serviço</TableCell>
-                <TableCell align="center">Status</TableCell>
-                <TableCell align="center">Motivo</TableCell>
-                <TableCell align="center">Unidade</TableCell>
+                <TableCell align="center" width={250} sx={{ border: '1px solid' }} >Nome</TableCell>
+                <TableCell align="center" width={90} sx={{ border: '1px solid' }}>Posto </TableCell>
+                <TableCell align="center" width={100} sx={{ border: '1px solid' }}>Escala</TableCell>
+                <TableCell align="center" width={70} sx={{ border: '1px solid' }}>Último Serviço</TableCell>
+                <TableCell align="center" width={50} sx={{ border: '1px solid' }}>Status</TableCell>
+                <TableCell align="center" width={100} sx={{ border: '1px solid' }}>Motivo</TableCell>
+                <TableCell align="center" width={100} sx={{ border: '1px solid' }}>Unidade</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {militaresFiltrados.map((m) => (
                 <TableRow key={m.id_militar}>
-                    <TableCell align="center">{m.nome}</TableCell>
-                    <TableCell align="center">{m.posto}</TableCell>
-                    <TableCell align="center">{m.escala}</TableCell>
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.nome}</TableCell>
+                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.posto}</TableCell>
+                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.escala}</TableCell>
+                    <TableCell align="center" sx={{ border: '1px solid' }}>
                     {m.ultimo_servico
                         ? m.ultimo_servico.slice(0, 10).split("-").reverse().join("/")
                         : "-"}
                     </TableCell>
-                    <TableCell align="center">{m.status}</TableCell>
-                    <TableCell align="center">{m.motivo}</TableCell>
-                    <TableCell align="center">{m.unidade}</TableCell>
+                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.status}</TableCell>
+                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.motivo}</TableCell>
+                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.unidade}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -114,56 +114,60 @@ export default function MilitaresPage() {
  //montagem dos cpmponentes na página
   return (
     <ThemeProvider theme={Theme}>
-      <Header />
       <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent:"center",
-          background: "linear-gradient(10deg, #d3c125, #96948d)",
-          width: "100%",
-          minHeight: "100%",
+       sx={{
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
         }}
-    >
-        <Typography sx={{ fontSize: 40, fontStyle: "italic" }}>
-          MILITARES FORA DA ESCALA
-        </Typography>
-        {/* Accordion por categoria */}
-        <Box sx={{ width: "80%"}}>
-          {/* Inativos */}
-          {(() => {
-            const oficialDia = ["1º Tenente", "2º Tenente", "Aspirante a Oficial"];
-            const adjunto = ["1º Sargento", "2º Sargento"];
-            const terceiroSargento = ["3º Sargento"];
-            const count1 = militares.filter((m) => oficialDia.includes(m.posto)).length;
-            const count2 = militares.filter((m) => adjunto.includes(m.posto)).length;
-            const count3 = militares.filter((m) => terceiroSargento.includes(m.posto)).length;
+      > 
+        <Header />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            background: "linear-gradient(10deg, #d3c125, #96948d)",
+            flex: 1
+          }}
+        >
+          <Typography variant="body1" sx={{ fontSize: 60, fontStyle: "italic", marginTop:4}}>
+              Militares Fora da Escala de Serviço
+          </Typography>
+          {/* Accordion por categoria */}
+          <Box sx={{ width: "80%", marginTop: 5, marginBottom: 5 }}>
+            {/* Inativos */}
+            {(() => {
+              const oficialDia = ["1º Tenente", "2º Tenente", "Aspirante a Oficial"];
+              const adjunto = ["1º Sargento", "2º Sargento"];
+              const terceiroSargento = ["3º Sargento"];
+              const count1 = militares.filter((m) => oficialDia.includes(m.posto)).length;
+              const count2 = militares.filter((m) => adjunto.includes(m.posto)).length;
+              const count3 = militares.filter((m) => terceiroSargento.includes(m.posto)).length;
 
-            return (
-                <Accordion sx={{ backgroundColor: "#6d6969c7", position:"relative" }}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                         <Typography sx={{ fontWeight: "bold", marginLeft: 2 }}>
-                           Militares Inativos
-                        </Typography>
-                    </AccordionSummary>
-                        <Typography sx={{ fontWeight: "bold", marginLeft: 2 }}>
-                            Oficial de Dia ({count1})
-                        </Typography>
-                    <AccordionDetails>{renderTabelaPorPosto(oficialDia)}</AccordionDetails>
-                        <Typography sx={{ fontWeight: "bold", marginLeft: 2 }}>
-                        Adjunto ao Oficial de Dia ({count2})
-                        </Typography>
-                    <AccordionDetails>{renderTabelaPorPosto(adjunto)}</AccordionDetails>
-                        <Typography sx={{ fontWeight: "bold", marginLeft: 2 }}>
-                            Comandante da Guarda ({count3})
-                        </Typography>
-
-                    <AccordionDetails>{renderTabelaPorPosto(terceiroSargento)}</AccordionDetails>
-                </Accordion>
-            );
-          })()}
+              return (
+                  <Accordion expanded={true} sx={{ backgroundColor: "#6d6969c7", position:"relative"}}>
+                      <AccordionSummary > {/*ícone para fechar o accordion se necessário usar => expandIcon={<ExpandMoreIcon />} */}
+                      </AccordionSummary>
+                          <Typography sx={{ fontWeight: "bold", marginLeft: 2 }}>
+                              Oficial de Dia ({count1})
+                          </Typography>
+                      <AccordionDetails>{renderTabelaPorPosto(oficialDia)}</AccordionDetails>
+                          <Typography sx={{ fontWeight: "bold", marginLeft: 2 }}>
+                          Adjunto ao Oficial de Dia ({count2})
+                          </Typography>
+                      <AccordionDetails>{renderTabelaPorPosto(adjunto)}</AccordionDetails>
+                          <Typography sx={{ fontWeight: "bold", marginLeft: 2 }}>
+                              Comandante da Guarda ({count3})
+                          </Typography>
+                      <AccordionDetails>{renderTabelaPorPosto(terceiroSargento)}</AccordionDetails>
+                  </Accordion>
+              );
+            })()}
+          </Box>
         </Box>
+        <Footer />
       </Box>
     </ThemeProvider>
   );

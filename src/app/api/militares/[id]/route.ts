@@ -1,15 +1,13 @@
-// Rotas por ID interessante para modificações por ID
+// rotas por ID interessante para modificações por ID
 import { NextRequest, NextResponse } from "next/server";
 import db from "../../../../backend/db";
 
 
-// PUT 
+//PUT 
 export async function PUT(request: NextRequest) {
   try {
-    
     const body = await request.json();
     const {id_militar, nome, identidade,  posto, dataPraca, escala, ultimo_servico, status, motivo, unidade } = body;
-
     // atualiza o valor no banco de dados
      await db.query(
       `UPDATE militares 
@@ -17,7 +15,6 @@ export async function PUT(request: NextRequest) {
        WHERE id_militar = ?`,
       [nome, identidade, posto, dataPraca, escala, ultimo_servico, status, motivo, unidade, id_militar]
     );
-
     // Retorna sucesso
     return NextResponse.json(
       { message: "Usuário atualizado com sucesso" },
@@ -31,7 +28,6 @@ export async function PUT(request: NextRequest) {
       );
   }
 }
-
 //DELETE 
 export async function DELETE(
   request: Request,

@@ -1,3 +1,5 @@
+//ESTE LAYOUT É GLOBAL
+
 // criar uma forma de transição mais suave entre as rotas se possível
 //ORGANIZAR MELHOR O LAYOUT DAS PÁGINAS
 

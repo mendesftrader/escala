@@ -8,9 +8,9 @@ import bcrypt from "bcryptjs";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { nome, posto, identidade, senha, dataPraca, escala, motivo, unidade } = body;
-    // Validação simples
-    if (!nome || !posto || !identidade || !senha || !dataPraca || !escala || !motivo || !unidade) {
+    const { nome, posto, identidade, senha, dataPraca, escala, unidade } = body;
+    // validação simples
+    if (!nome || !posto || !identidade || !senha || !dataPraca || !escala || !unidade) {
       return NextResponse.json(
         { sucesso: false, erro: "Todos os campos são obrigatórios" },
         { status: 400 }
@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
     const saltround = 3;
     //criar hash da senha
     const senhaHash = await bcrypt.hash(senha, saltround);
-    // Inserir no banco
+    // insere no banco a senha
     const [result] = await pool.query(
-      "INSERT INTO militares (nome, posto, identidade, senha, dataPraca, escala, status, motivo, unidade) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [nome, posto, identidade, senhaHash, dataPraca, escala, "ATIVO", motivo, unidade]
+      "INSERT INTO militares (nome, posto, identidade, senha, dataPraca, escala, status, unidade) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [nome, posto, identidade, senhaHash, dataPraca, escala, "ATIVO", unidade]
     );
     return NextResponse.json({
       sucesso: true,

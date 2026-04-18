@@ -5,11 +5,14 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from '../../theme/layout';
 import axios from "axios";
 import React, { useState, ChangeEvent } from "react";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 export default function Cadastro() {
   const Theme = theme;
 
-  // Muda o estado do formulário conforme digita os novos dados
+  // muda o estado do formulário conforme digita os novos dados
+  // o militar é cadastrado automaticamente como "ATIVO", o que já o inclui na escala
   const [form, setForm] = useState({
     nome: "",
     posto: "",
@@ -20,7 +23,6 @@ export default function Cadastro() {
     unidade: "",
   });
 
-  // Tipos de escala
   const escalas = [
     "Oficial de Dia",
     "Adjunto ao Oficial de Dia",
@@ -43,11 +45,40 @@ export default function Cadastro() {
     "9º B Sau",
   ]
 
-  // Atualiza estado ao digitar
+  // atualiza estado ao digitar
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  // Envia formulário para o backend
+  //cria execeções para formatar o campo nome
+  // formatar campos com a primeira letra maiscula e demais minusculas
+  //nomes com palavras de duas sílabas apresentam erro ex: " Daniel Da Silva Campos", corrigir.
+  const formataNomes = (text: string) => {
+    const excecao = ["da", "de", "do", "das", "dos"]
+
+    return text
+    .toLowerCase()
+    .split(" ")
+    .map((word, index) => {
+      if (index !== 0 && excecao.includes(word)){
+        return word;
+      }
+      return word.charAt(0).toUpperCase()+word.slice(1);
+    })
+    .join( " " );
+  }
+  // formata o campo nome
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === "nome" && value.length > 0) {
+      const formattedValue = formataNomes(value);
+      setForm({
+        ...form,
+        [name]: formattedValue,
+      });
+    }
+  };
+
+  // envia formulário para o backend
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Validação simples
@@ -56,12 +87,12 @@ export default function Cadastro() {
       return;
     }
     try {
-      // Prepara os dados para envio ao back
+      // prepara os dados para envio ao back
       const payload = { ...form };
-      // Axios envia para o endpoint do Next.js API mais simples possivel
+      // axios envia para o endpoint do Next.js API mais simples possivel
       const response = await axios.post("/api/militares", payload);
       alert(response.data.mensagem || "Usuário cadastrado com sucesso");
-      // Limpa formulário após clicar em cadastar
+      // limpa formulário após clicar em cadastar
       setForm({ nome: "", posto: "", identidade: "", senha: "", dataPraca: "", escala: "", unidade: "" });
     } catch (error) {
       console.error("Erro ao salvar os dados", error);
@@ -71,197 +102,197 @@ export default function Cadastro() {
   return (
     <ThemeProvider theme={Theme}> 
       <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-          background: "linear-gradient(10deg, #d3c125, #96948d)",
-        }}
+       sx={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column"
+      }}
       >
-        <Typography sx={{ fontSize: 40, fontStyle: "italic" }}>
-          18º Batalhão de Transporte
-        </Typography>
+        <Header />
         <Box
-          component="img"
-          src="/image.png"
-          alt="Logo"
-          sx={{ width: 200, padding: 1 }}
-        />
-        <Typography sx={{ fontSize: 40, fontStyle: "italic" }}>
-          A logística em movimento
-        </Typography>
-        <Paper
-          elevation={3}
           sx={{
-            maxWidth: 500,
-            width: "100%",
-            p: 2,
-            backgroundColor: "#fdf8f8e1",
-            mx: "auto",
+            flex: 1,
             display: "flex",
-            flexDirection: "column",
-            border: 2,
-            "&:hover": {
-              color: "#4cf709",
-              textDecorationColor: "black",
-              fontSize: "20px"
-            },
+            justifyContent: "center",
+            alignItems: "flex-start",
+            background: "linear-gradient(10deg, #d3c125, #96948d)",
+            pt: 4
           }}
         >
-          <Typography variant="h5" align="center" sx={{ mb: 2 }}>
-            Cadastro de Usuário
-          </Typography>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
+          <Paper
+            elevation={3}
             sx={{
+              marginTop: 10,
+              maxWidth: 500,
+              width: "100%",
+              p: 2,
+              backgroundColor: "#fdf8f8e1",
+              mx: "auto",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 1.5
+              border: 2,
+              "&:hover": {
+                color: "#4cf709",
+                textDecorationColor: "black",
+                fontSize: "20px"
+              },
             }}
           >
-            <TextField
-              label="Nome completo"
-              name="nome"
-              value={form.nome}
-              onChange={handleChange}
-              required
-              size="small"
-              variant="outlined"
+            <Typography variant="h5" align="center" sx={{ mb: 2 }}>
+              Cadastro de Usuário
+            </Typography>
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
               sx={{
-                width: 350,
-                "& .MuiOutlinedInput-root": {
-                  "&.Mui-focused fieldset": { borderColor: "black" },
-                },
-                "& label.Mui-focused": { color: "red" },
-              }}
-            />
-            
-            <TextField
-              label="Posto/Graduação"
-              name="posto"
-              value={form.posto}
-              onChange={handleChange}
-              select
-              required
-              size="small"
-              variant="outlined"
-              sx={{
-                width: 350,
-                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
-                "& label.Mui-focused": { color: "red" },
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 1.5
               }}
             >
-             {postos.map((postos, index) => (
-                <MenuItem key={index} value={postos}>
-                  {postos}
-                </MenuItem>
-              ))}
-            </TextField>
+              <TextField
+                label="Nome completo"
+                name="nome"
+                value={form.nome}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                required
+                size="small"
+                variant="outlined"
+                sx={{
+                  width: 350,
+                  "& .MuiOutlinedInput-root": {
+                    "&.Mui-focused fieldset": { borderColor: "black" },
+                  },
+                  "& label.Mui-focused": { color: "red" },
+                }}
+              />
+              
+              <TextField
+                label="Posto/Graduação"
+                name="posto"
+                value={form.posto}
+                onChange={handleChange}
+                select
+                required
+                size="small"
+                variant="outlined"
+                sx={{
+                  width: 350,
+                  "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                  "& label.Mui-focused": { color: "red" },
+                }}
+              >
+              {postos.map((postos, index) => (
+                  <MenuItem key={index} value={postos}>
+                    {postos}
+                  </MenuItem>
+                ))}
+              </TextField>
 
-            <TextField
-              label="Identidade"
-              name="identidade"
-              value={form.identidade}
-              onChange={handleChange}
-              required
-              size="small"
-              variant="outlined"
-              sx={{
-                width: 350,
-                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
-                "& label.Mui-focused": { color: "red" },
-              }}
-            />
+              <TextField
+                label="Identidade"
+                name="identidade"
+                value={form.identidade}
+                onChange={handleChange}
+                required
+                size="small"
+                variant="outlined"
+                sx={{
+                  width: 350,
+                  "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                  "& label.Mui-focused": { color: "red" },
+                }}
+              />
 
-            <TextField
-              label="Senha"
-              name="senha"
-              type="password"
-              value={form.senha}
-              onChange={handleChange}
-              required
-              size="small"
-              variant="outlined"
-              sx={{
-                width: 350,
-                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
-                "& label.Mui-focused": { color: "red" },
-              }}
-            />
+              <TextField
+                label="Senha"
+                name="senha"
+                type="password"
+                value={form.senha}
+                onChange={handleChange}
+                required
+                size="small"
+                variant="outlined"
+                sx={{
+                  width: 350,
+                  "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                  "& label.Mui-focused": { color: "red" },
+                }}
+              />
 
-            <TextField
-              label="Data de Praça"
-              name="dataPraca"
-              type="date"
-              value={form.dataPraca}
-              onChange={handleChange}
-              required
-              InputLabelProps={{ shrink: true }}
-              size="small"
-              variant="outlined"
-              sx={{
-                width: 350,
-                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
-                "& label.Mui-focused": { color: "red" },
-              }}
-            />
+              <TextField
+                label="Data de Praça"
+                name="dataPraca"
+                type="date"
+                value={form.dataPraca}
+                onChange={handleChange}
+                required
+                InputLabelProps={{ shrink: true }}
+                size="small"
+                variant="outlined"
+                sx={{
+                  width: 350,
+                  "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                  "& label.Mui-focused": { color: "red" },
+                }}
+              />
 
-            <TextField
-              select
-              label="Escala"
-              name="escala"
-              value={form.escala}
-              onChange={handleChange}
-              required
-              size="small"
-              variant="outlined"
-              sx={{
-                width: 350,
-                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
-                "& label.Mui-focused": { color: "red" },
-              }}
-            >
-              {escalas.map((escala, index) => (
-                <MenuItem key={index} value={escala}>
-                  {escala}
-                </MenuItem>
-              ))}
-            </TextField>
+              <TextField
+                select
+                label="Escala"
+                name="escala"
+                value={form.escala}
+                onChange={handleChange}
+                required
+                size="small"
+                variant="outlined"
+                sx={{
+                  width: 350,
+                  "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                  "& label.Mui-focused": { color: "red" },
+                }}
+              >
+                {escalas.map((escala, index) => (
+                  <MenuItem key={index} value={escala}>
+                    {escala}
+                  </MenuItem>
+                ))}
+              </TextField>
 
-            <TextField
-              label="Unidade"
-              name="unidade"
-              value={form.unidade}
-              onChange={handleChange}
-              select
-              required
-              size="small"
-              variant="outlined"
-              sx={{
-                width: 350,
-                "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
-                "& label.Mui-focused": { color: "red" },
-              }}
-            >
-             {unidades.map((unidades, index) => (
-                <MenuItem key={index} value={unidades}>
-                  {unidades}
-                </MenuItem>
-              ))}
-            </TextField>
+              <TextField
+                label="Unidade"
+                name="unidade"
+                value={form.unidade}
+                onChange={handleChange}
+                select
+                required
+                size="small"
+                variant="outlined"
+                sx={{
+                  width: 350,
+                  "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
+                  "& label.Mui-focused": { color: "red" },
+                }}
+              >
+              {unidades.map((unidades, index) => (
+                  <MenuItem key={index} value={unidades}>
+                    {unidades}
+                  </MenuItem>
+                ))}
+              </TextField>
 
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-              <Button type="submit" variant="contained" color="primary" sx={{ px: 4 }}>
-                Cadastrar
-              </Button>
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+                <Button type="submit" variant="contained" color="primary" sx={{ px: 4 }}>
+                  Cadastrar
+                </Button>
+              </Box>
             </Box>
-          </Box>
-        </Paper>
+          </Paper>
+        </Box>
+        <Footer />
       </Box>
     </ThemeProvider>
   );

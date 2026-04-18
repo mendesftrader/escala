@@ -3,6 +3,11 @@
 import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import Link from "next/link";
 
+const handleLogout = async ( ) => {
+  await fetch("/api/logout", { method: "POST" });
+  window.location.href = "/login"; //redireciona para outra página só escolher
+}
+
 export default function Header() {
   return (
     <AppBar position="relative">
@@ -18,7 +23,7 @@ export default function Header() {
           <Button color="inherit" component={Link} href="/previsao">Previsão da Escala</Button>
           <Button color="inherit" component={Link} href="/inativo">Militares Inativos</Button>
           <Button color="inherit" component={Link} href="cadastro">Cadastro</Button>
-          <Button color="inherit" component={Link} href=" ">Sair</Button>
+          <Button color="inherit" onClick={handleLogout}>Sair</Button>
         </Box>
       </Toolbar>
     </AppBar>
