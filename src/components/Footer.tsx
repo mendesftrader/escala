@@ -11,12 +11,12 @@ export default function Footer() {
             sx={{
             top: "auto",
             bottom: 0,
-            height: 130
+            height: 100
             }}
         >
             <Toolbar sx={{ display:"flex", justifyContent: "center", alignItems:"center", height:"100%" }}>
-            <Box>
-                <Typography> Desenvolvido pela Seção de Informática do 18º Batalhão de Transporte </Typography>
+            <Box >
+                <Typography color="secondary"> Desenvolvido pela Seção de Informática do 18º Batalhão de Transporte </Typography>
             </Box>
 
             </Toolbar>

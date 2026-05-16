@@ -80,29 +80,29 @@ export default function MilitaresPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center" width={250} sx={{ border: '1px solid' }} >Nome</TableCell>
-                <TableCell align="center" width={90} sx={{ border: '1px solid' }}>Posto </TableCell>
-                <TableCell align="center" width={100} sx={{ border: '1px solid' }}>Escala</TableCell>
-                <TableCell align="center" width={70} sx={{ border: '1px solid' }}>Último Serviço</TableCell>
-                <TableCell align="center" width={50} sx={{ border: '1px solid' }}>Status</TableCell>
-                <TableCell align="center" width={100} sx={{ border: '1px solid' }}>Motivo</TableCell>
-                <TableCell align="center" width={100} sx={{ border: '1px solid' }}>Unidade</TableCell>
+                <TableCell align="center" width={250} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }} >Nome</TableCell>
+                <TableCell align="center" width={90} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Posto </TableCell>
+                <TableCell align="center" width={100} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Escala</TableCell>
+                <TableCell align="center" width={70} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Último Serviço</TableCell>
+                <TableCell align="center" width={50} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Status</TableCell>
+                <TableCell align="center" width={100} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Motivo</TableCell>
+                <TableCell align="center" width={100} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Unidade</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {militaresFiltrados.map((m) => (
                 <TableRow key={m.id_militar}>
-                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.nome}</TableCell>
-                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.posto}</TableCell>
-                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.escala}</TableCell>
-                    <TableCell align="center" sx={{ border: '1px solid' }}>
+                    <TableCell align="center" sx={{ border: '2px solid' }}>{m.nome}</TableCell>
+                    <TableCell align="center" sx={{ border: '2px solid' }}>{m.posto}</TableCell>
+                    <TableCell align="center" sx={{ border: '2px solid' }}>{m.escala}</TableCell>
+                    <TableCell align="center" sx={{ border: '2px solid' }}>
                     {m.ultimo_servico
                         ? m.ultimo_servico.slice(0, 10).split("-").reverse().join("/")
                         : "-"}
                     </TableCell>
-                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.status}</TableCell>
-                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.motivo}</TableCell>
-                    <TableCell align="center" sx={{ border: '1px solid' }}>{m.unidade}</TableCell>
+                    <TableCell align="center" sx={{ border: '2px solid' }}>{m.status}</TableCell>
+                    <TableCell align="center" sx={{ border: '2px solid' }}>{m.motivo}</TableCell>
+                    <TableCell align="center" sx={{ border: '2px solid' }}>{m.unidade}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -151,15 +151,15 @@ export default function MilitaresPage() {
                       <AccordionSummary > {/*ícone para fechar o accordion se necessário usar => expandIcon={<ExpandMoreIcon />} */}
                       </AccordionSummary>
                           <Typography sx={{ fontWeight: "bold", marginLeft: 2 }}>
-                              Oficial de Dia ({count1})
+                            Militares que concorrem a escala de Oficial de Dia ({count1})
                           </Typography>
                       <AccordionDetails>{renderTabelaPorPosto(oficialDia)}</AccordionDetails>
                           <Typography sx={{ fontWeight: "bold", marginLeft: 2 }}>
-                          Adjunto ao Oficial de Dia ({count2})
+                            Militares que concorrem a escala de Adjunto ao Oficial de Dia ({count2})
                           </Typography>
                       <AccordionDetails>{renderTabelaPorPosto(adjunto)}</AccordionDetails>
                           <Typography sx={{ fontWeight: "bold", marginLeft: 2 }}>
-                              Comandante da Guarda ({count3})
+                            Militares que concorrem a escala de Comandante da Guarda ({count3})
                           </Typography>
                       <AccordionDetails>{renderTabelaPorPosto(terceiroSargento)}</AccordionDetails>
                   </Accordion>

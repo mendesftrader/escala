@@ -9,13 +9,12 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const {id_militar, nome, identidade,  posto, dataPraca, escala, ultimo_servico, status, motivo, unidade } = body;
     // atualiza o valor no banco de dados
-     await db.query(
-      `UPDATE militares 
-       SET nome = ?, identidade = ?, posto = ?, dataPraca = ?, escala = ?, ultimo_servico = ?, status = ?, motivo = ?, unidade = ?
-       WHERE id_militar = ?`,
-      [nome, identidade, posto, dataPraca, escala, ultimo_servico, status, motivo, unidade, id_militar]
-    );
-    // Retorna sucesso
+      await db.query(
+        `UPDATE militares 
+          SET nome = ?, identidade = ?, posto = ?, dataPraca = ?, escala = ?, ultimo_servico = ?, status = ?, motivo = ?, unidade = ?
+          WHERE id_militar = ?`,
+        [nome, identidade, posto, dataPraca, escala, ultimo_servico, status, motivo, unidade, id_militar]
+      );
     return NextResponse.json(
       { message: "Usuário atualizado com sucesso" },
       { status: 200 }
@@ -28,7 +27,9 @@ export async function PUT(request: NextRequest) {
       );
   }
 }
-//DELETE 
+//DELETE rota não utilizada no momento, para fins de integridade 
+// e poder sempre pesquisar quando um militar tirar serviço 
+// é melhor apenas INATIVAR o usuário e manter seus dados salvos
 export async function DELETE(
   request: Request,
   context: { params: Promise<{ id: string }> }

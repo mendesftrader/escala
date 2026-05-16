@@ -1,29 +1,30 @@
-//rota backend para exibir os militares inativos, simples rota
 import { NextResponse } from "next/server";
 import db from "../../../backend/db";
 
 
-// GET-geral, para obter dados dos militares inativos
+// GET-geral, para obter dados da tabela escala
 export async function GET( ){
   try{
-      const [militares] = await db.query(
+      const [escalas] = await db.query(
         `SELECT 
+        id,
         id_militar, 
-        nome, 
         posto, 
+        nome, 
         escala, 
-        ultimo_servico,       
-        status,
-        motivo,
+        data,      
+        tipo_dia,
         unidade
-        FROM militares
-        WHERE status = 'INATIVO'
-        ORDER BY ultimo_servico ASC
+        FROM escalas
+        WHERE data >= CURRENT_DATE 
+        ORDER BY data ASC
         `
       );
-      return NextResponse.json(militares);
+      return NextResponse.json(escalas);
   }catch(error){
       console.error("Erro ao buscar militar", error);
       return NextResponse.json({error: "Erro ao buscar miliatres"}, {status: 500});
   }
 }
+
+

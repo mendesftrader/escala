@@ -1,7 +1,7 @@
-// Importa o NextResponse para responder requisições HTTP no Next.js
 import { NextResponse } from "next/server";
 import db from "../../../backend/db";
 
+//Tipos de dia mais a frente poderá ser implementado um controle de pagamentos por serviços realizados em FDS ou Feriados
 type CategoriaDia = "SEMANA" | "FIM_SEMANA" | "FERIADO";
 const feriadosFixos = [
   "2026-01-01",
@@ -14,15 +14,15 @@ const feriadosFixos = [
   "2026-12-25",
 ];
 
-// formatar data no padrão YYYY-MM-DD (formato do MySQL)
+//função necessária para atualizar a data
 function formatarData(date: Date): string {
-  const ano = date.getFullYear(); // pega o ano
-  const mes = String(date.getMonth() + 1).padStart(2, "0"); // mês (0-11 → +1)
-  const dia = String(date.getDate()).padStart(2, "0"); // dia com 2 dígitos
-  return `${ano}-${mes}-${dia}`; // retorna string formatada
+  const ano = date.getFullYear();
+  const mes = String(date.getMonth() + 1).padStart(2, "0");
+  const dia = String(date.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
 }
 
-//define o tipo do dia
+//verifica se é dia de semana, DFS ou feriado
 function getCategoriaDia(data: string): CategoriaDia {
   if (feriadosFixos.includes(data)) return "FERIADO";
 
@@ -32,11 +32,13 @@ function getCategoriaDia(data: string): CategoriaDia {
 
   return diaSemana === 0 || diaSemana === 6
     ? "FIM_SEMANA"
-    : "SEMANA"; // Caso contrário → dia útil
+    : "SEMANA";
 }
 
-export async function GET() {
+// ROTA POST => responsável por gerar a escala
+export async function POST() {
   try {
+    //pega o militar somente se o STATUS for ativo
     const [militares]: any = await db.query(`
       SELECT 
         id_militar,
@@ -48,45 +50,50 @@ export async function GET() {
       FROM militares
       WHERE status = 'ATIVO'
       ORDER BY 
-        ultimo_servico IS NULL DESC, -- quem nunca serviu vem primeiro
-        ultimo_servico ASC           -- depois os mais antigos
+        ultimo_servico IS NULL DESC,
+        ultimo_servico ASC
     `);
+
+    //quantidade de dias a gerar, pode ser mudado para que o usuário escolha a quantidade de dias, para o momento está ideal
     const dias = 30;
+
+    //verifica quantas escalas existem, importante se for adicionar uma nova escala
     const escalasDisponiveis = [
       ...new Set(militares.map((m: any) => m.escala)),
     ];
-    const controleIndex: Record<string, number> = {};
 
+    // cria um objeto para percorrer todas as escalas disponíveis
+    const controleIndex: Record<string, number> = {};
     for (const escala of escalasDisponiveis) {
       controleIndex[escala] = 0;
     }
-  
-    const base = new Date();             
-    base.setHours(0, 0, 0, 0);           
-    base.setDate(base.getDate() + 1);   
 
+    //utliza a data de amanhã como base
+    const base = new Date();
+    base.setHours(0, 0, 0, 0);
+    base.setDate(base.getDate() + 1);
+    
     for (let i = 0; i < dias; i++) {
+
       const d = new Date(base);
       d.setDate(d.getDate() + i);
       const data = formatarData(d);
-      const categoriaDia = getCategoriaDia(data);
+      const tipoDia = getCategoriaDia(data);
+
       for (const escalaServico of escalasDisponiveis) {
 
-        // filtra militares que pertencem àquela escala
         const militaresDaEscala = militares.filter(
           (m: any) => m.escala === escalaServico
         );
 
-        // se não houver militares nessa escala → pula
         if (militaresDaEscala.length === 0) continue;
 
-        // evita duplicidade
+        // não permite o mesmo serviço para a mesma escala com a mesma data
         const [existe]: any = await db.query(
           `SELECT id FROM escalas WHERE data = ? AND escala = ?`,
           [data, escalaServico]
         );
 
-        // remove para recriar (evita duplicidade)
         if (existe.length > 0) {
           await db.query(
             `DELETE FROM escalas WHERE data = ? AND escala = ?`,
@@ -94,37 +101,34 @@ export async function GET() {
           );
         }
 
-        // seleciona o militar da vez
         const index =
-          controleIndex[escalaServico] % militaresDaEscala.length;
-
-        // Seleciona o militar
+        controleIndex[escalaServico] % militaresDaEscala.length;
         const militar = militaresDaEscala[index];
 
-        // salva a escala no banco
         await db.query(
-          `INSERT INTO escalas (posto, nome, escala, data, tipo_dia, unidade, id_militar)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO escalas 
+          (posto, nome, escala, data, tipo_dia, unidade, id_militar)
+          VALUES (?, ?, ?, ?, ?, ?, ?)`,
           [
-            militar.posto,        // posto do militar
-            militar.nome,         // nome
-            escalaServico,        // tipo de escala
-            data,                 // data do serviço
-            categoriaDia,         // tipo do dia
-            militar.unidade,      // unidade
-            militar.id_militar    // ID do militar
+            militar.posto,
+            militar.nome,
+            escalaServico,
+            data,
+            tipoDia,
+            militar.unidade,
+            militar.id_militar
           ]
         );
         controleIndex[escalaServico]++;
       }
     }
+
     return NextResponse.json({
       message: "Escala gerada com sucesso",
-      diasGerados: dias,
-      escalas: escalasDisponiveis.length
+      diasGerados: dias
     });
   } catch (error) {
-    console.error("Erro ao gerar escala", error);
+    console.error("Erro ao gerar escala:", error);
     return NextResponse.json(
       { error: "Erro ao gerar escala" },
       { status: 500 }

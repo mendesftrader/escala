@@ -148,23 +148,12 @@ export default function MilitaresPage() {
         `/api/militares/${militarEditado.id_militar}`,
         militarEditado
       );
+      await fetch("/api/previsao");//necessário para atualizar a escala após alguma atualização
+      alert("Escala atualizada com sucesso")
     } catch (error) {
       console.error("Erro ao salvar alterações", error);
       setMilitares(antigo);
       alert("Erro ao atualizar militar.");
-    }
-  };
-
-
-  // Deletar militar
-  //permite excluir usuários
-  const handleDelete = async (id: number) => {
-    if (!id) return;
-    try {
-      await axios.delete(`/api/militares/${id}`);
-      setMilitares(prev => prev.filter(m => m.id_militar !== id));
-    } catch (error) {
-      console.error("Erro ao deletar usuário", error);
     }
   };
 
@@ -191,51 +180,42 @@ export default function MilitaresPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center" width={250} sx={{ border: '1px solid' }}>Nome</TableCell>
-                <TableCell align="center" width={180} sx={{ border: '1px solid' }}>Posto</TableCell>
-                <TableCell align="center" width={100} sx={{ border: '1px solid' }}>Identidade</TableCell>
-                <TableCell align="center" width={80} sx={{ border: '1px solid' }}>Data de Praça</TableCell>
-                <TableCell align="center" width={250} sx={{ border: '1px solid' }}>Escala</TableCell>
-                <TableCell align="center" width={80} sx={{ border: '1px solid' }}>Último Serviço</TableCell>
-                <TableCell align="center" width={60} sx={{ border: '1px solid' }}>Status</TableCell>
-                <TableCell align="center" width={100} sx={{ border: '1px solid' }}>Motivo</TableCell>
-                <TableCell align="center" width={180} sx={{ border: '1px solid' }}>Unidade</TableCell>
-                <TableCell align="center" width={250} sx={{ border: '1px solid' }}>Ações</TableCell>
+                <TableCell align="center" width={250} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Nome</TableCell>
+                <TableCell align="center" width={180} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Posto</TableCell>
+                <TableCell align="center" width={100} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Identidade</TableCell>
+                <TableCell align="center" width={80} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Data de Praça</TableCell>
+                <TableCell align="center" width={250} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Escala</TableCell>
+                <TableCell align="center" width={80} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Último Serviço</TableCell>
+                <TableCell align="center" width={60} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Status</TableCell>
+                <TableCell align="center" width={100} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Motivo</TableCell>
+                <TableCell align="center" width={180} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Unidade</TableCell>
+                <TableCell align="center" width={250} sx={{ border: '2px solid', fontWeight:"bold", backgroundColor:"#a6ca2249" }}>Ações</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {militaresFiltrados.map((m) => (
                 <TableRow key={m.id_militar}>
-                  <TableCell align="center" width={250} sx={{ border: '1px solid' }}>{m.nome}</TableCell>
-                  <TableCell align="center" width={180} sx={{ border: '1px solid' }}>{m.posto}</TableCell>
-                  <TableCell align="center" width={100} sx={{ border: '1px solid' }}>{m.identidade}</TableCell>
-                  <TableCell align="center" width={80} sx={{ border: '1px solid' }}>
+                  <TableCell align="center" width={250} sx={{ border: '2px solid' }}>{m.nome}</TableCell>
+                  <TableCell align="center" width={180} sx={{ border: '2px solid' }}>{m.posto}</TableCell>
+                  <TableCell align="center" width={100} sx={{ border: '2px solid' }}>{m.identidade}</TableCell>
+                  <TableCell align="center" width={80} sx={{ border: '2px solid' }}>
                     {m.dataPraca ? m.dataPraca.slice(0, 10).split("-").reverse().join("/") : "-"}
                   </TableCell>
-                  <TableCell align="center" width={250} sx={{ border: '1px solid' }}>{m.escala}</TableCell>
-                  <TableCell align="center" width={80} sx={{ border: '1px solid' }}>
+                  <TableCell align="center" width={250} sx={{ border: '2px solid' }}>{m.escala}</TableCell>
+                  <TableCell align="center" width={80} sx={{ border: '2px solid' }}>
                     {m.ultimo_servico
                       ? m.ultimo_servico.slice(0, 10).split("-").reverse().join("/") : "-"}
                   </TableCell>
-                  <TableCell align="center" width={60} sx={{ border: '1px solid' }}>{m.status}</TableCell>
-                  <TableCell align="center" width={100} sx={{ border: '1px solid' }}>{m.motivo}</TableCell>
-                  <TableCell align="center" width={180} sx={{ border: '1px solid' }}>{m.unidade}</TableCell>
-                  <TableCell align="center" width={250} sx={{ border: '1px solid' }}>
+                  <TableCell align="center" width={60} sx={{ border: '2px solid' }}>{m.status}</TableCell>
+                  <TableCell align="center" width={100} sx={{ border: '2px solid' }}>{m.motivo}</TableCell>
+                  <TableCell align="center" width={180} sx={{ border: '2px solid' }}>{m.unidade}</TableCell>
+                  <TableCell align="center" width={250} sx={{ border: '2px solid' }}>
                     <Button
                       variant="contained"
-                      size="small"
                       onClick={() => handleEditClick(m)}
-                      sx={{ m: 1 }}
+                      sx={{ border:"2px solid", backgroundColor:"blueviolet", width:150}}
                     >
                       Editar
-                    </Button>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      color="error"
-                      onClick={() => handleDelete(m.id_militar)}
-                    >
-                      Excluir
                     </Button>
                   </TableCell>
                 </TableRow>

@@ -2,28 +2,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/backend/db";
 import db from "../../../backend/db";
-import bcrypt from "bcryptjs";
+
 
 // POST criar usuário
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { nome, posto, identidade, senha, dataPraca, escala, unidade } = body;
+    const body = await req.json(); //converte o json enviado em JS
+    const { nome, posto, identidade, dataPraca, escala, unidade } = body;
     // validação simples
-    if (!nome || !posto || !identidade || !senha || !dataPraca || !escala || !unidade) {
+    if (!nome || !posto || !identidade || !dataPraca || !escala || !unidade) {
       return NextResponse.json(
         { sucesso: false, erro: "Todos os campos são obrigatórios" },
         { status: 400 }
       );
     }
-    //nivel do bcrypt
-    const saltround = 3;
-    //criar hash da senha
-    const senhaHash = await bcrypt.hash(senha, saltround);
-    // insere no banco a senha
+    //a senha será inserida por outra rota
     const [result] = await pool.query(
-      "INSERT INTO militares (nome, posto, identidade, senha, dataPraca, escala, status, unidade) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [nome, posto, identidade, senhaHash, dataPraca, escala, "ATIVO", unidade]
+      "INSERT INTO militares (nome, posto, identidade, senha, dataPraca, escala, status, unidade, primeiro_login) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [nome, posto, identidade, null, dataPraca, escala, "ATIVO", unidade, true]
     );
     return NextResponse.json({
       sucesso: true,
@@ -39,7 +35,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET-geral, para obter dados
+// GET-geral, para obter dados por antiguidade, ou seja o mais antigo primeiro
 export async function GET( ){
   try{
       const [militares] = await db.query(
@@ -53,7 +49,8 @@ export async function GET( ){
         ultimo_servico,       
         status,
         motivo,
-        unidade
+        unidade,
+        primeiro_login
         FROM militares
         ORDER BY dataPraca ASC
         `

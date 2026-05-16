@@ -3,7 +3,7 @@
 "use client"; //Por utilizar hooks
 
 import { useState} from 'react';
-import { TextField, Button, Box, Typography, Link, Paper, Container } from "@mui/material";
+import { TextField, Button, Box, Typography, Paper, Container } from "@mui/material";
 import Image from 'next/image'; //importa a imagem da pasta public
 import theme from '../../theme/layout' // permite usar as cores do theme em todas as páginas
 import {ThemeProvider} from "@mui/material/styles"; //necessário envolver todo o código para utilização do theme
@@ -16,24 +16,29 @@ export default function Login ( ){
     const [identidade, setIdentidade] = useState("");
     const [senha, setSenha] = useState("");
 
-    const handleLogin = async (e) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // validação simples
         if (!identidade || !senha) {
             alert("Preencha todos os campos");
             return;
         }
+
         try {
-            await axios.post("/api/login", {
-            identidade: identidade, // importante: nome igual ao backend
-            senha: senha,
+            const res = await axios.post("/api/login", {
+                identidade,
+                senha,
             });
-            console.log("rota utilizada");
-            console.log("dados recebidos:", identidade, senha);
-            // redireciona para outra página que você escolher
-            window.location.href = "/militares";
-        }catch (error: unknown) {
+
+            console.log("Login OK:", res.data);
+
+            // logica para encaminhar o usuário ao primeiro login
+            if (res.data.primeiro_login) {
+                window.location.href = "/primeiro-acesso";
+            } else {
+                window.location.href = "/previsao";
+            }
+        } catch (error: unknown) {
             if (axios.isAxiosError(error)) {
                 alert(error.response?.data?.error || "Erro ao fazer login");
             } else {
@@ -53,6 +58,7 @@ export default function Login ( ){
             >
                 <Box
                     sx={{
+                        flex:1,
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
@@ -67,7 +73,7 @@ export default function Login ( ){
                             justifyContent: "center", 
                             alignItems: "center", 
                             height:"10vh", 
-                            backgroundColor:"#53534f",
+                            backgroundColor:"#585a5c",
                             borderRadius: "0px 0px 100px 100px",
                             border: "4px solid #0f0f01",
                         }}
@@ -76,7 +82,7 @@ export default function Login ( ){
                             Escala Eletrônica
                         </Typography>
                     </Container>
-                    <Typography variant="body1" sx={{ fontSize: 35, fontStyle: "italic", marginTop:5}}>
+                    <Typography variant="body1" sx={{ fontSize: 35, fontStyle: "italic", marginTop:2}}>
                         18º Batalhão de Transporte
                     </Typography>
                     <Box
@@ -153,56 +159,20 @@ export default function Login ( ){
                             />
                         </Paper>
                         <Box sx={{ mt: 2, display:"flex", justifyContent: "center", alignItems:"center"}}>
-                            <Button type="submit" variant="contained" color="primary" sx={{ px: 10 }} >
+                            <Button 
+                            type="submit" 
+                            variant="contained" 
+                            color="primary" 
+                            sx={{
+                                width:200, 
+                                border: '2px solid',
+                                "&:hover": {
+                                    backgroundColor: "#a415c0", // efeito hover
+                                },
+                            }} 
+                            >
                                 Entrar
                             </Button>
-                        </Box>
-                        <Box>
-                            <Link 
-                                //incluir rota de cadastro e perca de senha
-                                sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    height: "2vh",
-                                    color: '#080808',
-                                    cursor: "pointer",// cursor luvinha
-                                    textDecoration:"none",
-                                    padding: 1,
-                                    fontFamily: "Roboto, sans-serif",
-                                    "&:hover": {// efeito hover para melhor vizualização
-                                        color: "#f70909",
-                                        textDecorationColor: "black",
-                                        fontSize:"20px"
-                                    },
-                                }}
-                            >
-                                Faça o seu cadastro
-                            </Link>
-                        </Box>
-                        <Box>
-                            <Link 
-                                //incluir rota de cadastro e perca de senha
-                                sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    height: "2vh",
-                                    color: '#080808',
-                                    cursor: "pointer",// cursor luvinha
-                                    textDecoration:"none",
-                                    fontFamily: "Roboto, sans-serif",
-                                    "&:hover": {// efeito hover para melhor vizualização
-                                        color: "#f70909",
-                                        textDecorationColor: "black",
-                                        fontSize:"20px"
-                                    },
-                                }}
-                            >
-                                Esqueceu a senha?
-                            </Link>
                         </Box>
                     </Box>
                 </Box>

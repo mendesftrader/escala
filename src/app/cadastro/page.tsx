@@ -10,14 +10,12 @@ import Footer from "../../components/Footer";
 
 export default function Cadastro() {
   const Theme = theme;
-
   // muda o estado do formulário conforme digita os novos dados
   // o militar é cadastrado automaticamente como "ATIVO", o que já o inclui na escala
   const [form, setForm] = useState({
     nome: "",
     posto: "",
     identidade: "",
-    senha: "",
     dataPraca: "",
     escala: "",
     unidade: "",
@@ -50,11 +48,10 @@ export default function Cadastro() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
   //cria execeções para formatar o campo nome
-  // formatar campos com a primeira letra maiscula e demais minusculas
+  //formatar campos com a primeira letra maiscula e demais minusculas
   //nomes com palavras de duas sílabas apresentam erro ex: " Daniel Da Silva Campos", corrigir.
   const formataNomes = (text: string) => {
     const excecao = ["da", "de", "do", "das", "dos"]
-
     return text
     .toLowerCase()
     .split(" ")
@@ -78,11 +75,28 @@ export default function Cadastro() {
     }
   };
 
+  const formataIdentidade = (text: string) => {
+    const apenasnumeros = text.replace(/\D/g, "");
+    return apenasnumeros.slice(0, 10)
+  }
+
+  // formata o campo identidade
+  const handleBlur2 = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === "identidade" && value.length > 0) {
+      const formattedValue = formataIdentidade(value);
+      setForm({
+        ...form,
+        [name]: formattedValue,
+      });
+    }
+  };
+
   // envia formulário para o backend
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Validação simples
-    if (!form.nome || !form.posto || !form.identidade || !form.senha || !form.dataPraca || !form.escala || !form.unidade) {
+    if (!form.nome || !form.posto || !form.identidade || !form.dataPraca || !form.escala || !form.unidade) {
       alert("Preencha todos os campos!");
       return;
     }
@@ -93,7 +107,8 @@ export default function Cadastro() {
       const response = await axios.post("/api/militares", payload);
       alert(response.data.mensagem || "Usuário cadastrado com sucesso");
       // limpa formulário após clicar em cadastar
-      setForm({ nome: "", posto: "", identidade: "", senha: "", dataPraca: "", escala: "", unidade: "" });
+      setForm({ nome: "", posto: "", identidade: "", dataPraca: "", escala: "", unidade: "" });
+      await fetch("/api/previsao");//necessário para atualizar a escala após alguma atualização
     } catch (error) {
       console.error("Erro ao salvar os dados", error);
       alert("Erro ao tentar cadastrar usuário.");
@@ -132,7 +147,7 @@ export default function Cadastro() {
               flexDirection: "column",
               border: 2,
               "&:hover": {
-                color: "#4cf709",
+                color: "#1041d6",
                 textDecorationColor: "black",
                 fontSize: "20px"
               },
@@ -197,22 +212,7 @@ export default function Cadastro() {
                 name="identidade"
                 value={form.identidade}
                 onChange={handleChange}
-                required
-                size="small"
-                variant="outlined"
-                sx={{
-                  width: 350,
-                  "& .MuiOutlinedInput-root": { "&.Mui-focused fieldset": { borderColor: "black" } },
-                  "& label.Mui-focused": { color: "red" },
-                }}
-              />
-
-              <TextField
-                label="Senha"
-                name="senha"
-                type="password"
-                value={form.senha}
-                onChange={handleChange}
+                onBlur={handleBlur2}
                 required
                 size="small"
                 variant="outlined"
@@ -285,7 +285,18 @@ export default function Cadastro() {
               </TextField>
 
               <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
-                <Button type="submit" variant="contained" color="primary" sx={{ px: 4 }}>
+                <Button 
+                  type="submit" 
+                  variant="contained" 
+                  color="primary" 
+                  sx={{
+                    width:200, 
+                    border: '2px solid',
+                    "&:hover": {
+                        backgroundColor: "#a415c0", // efeito 
+                    },
+                  }} 
+                >
                   Cadastrar
                 </Button>
               </Box>
